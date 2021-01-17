@@ -1,0 +1,26 @@
+{
+  "name": "grabql-api",
+  "version": "2.2.0",
+  "description": "Serverless web page information grabber APIs",
+  "main": "handler.js",
+  "scripts": {
+    "test": "serverless-bundle test"
+  },
+  "author": "alpha2phi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alpha2phi/serverless.git"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.828.0",
+    "serverless-bundle": "3.2.0",
+    "serverless-dotenv-plugin": "^2.1.1",
+    "serverless-offline": "^5.3.3"
+  },
+  "dependencies": {
+    "graphql": "^15.4.0",
+    "nanoid": "^3.1.20",
+    "puppeteer": "^5.5.0"
+  }
+}
