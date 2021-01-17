@@ -24,12 +24,10 @@ const schema = buildSchema(`
   }
 `);
 
-const database = require('./mocks/database');
+const database = require('./mocks/database').default;
 const resolvers = {
   order: async ({id}) => {
     const order = await database.orders.get(id);
-    console.log("results order id ----", id);
-    console.log("results order ----", order);
     if (!order) return null;
 
     return {
@@ -40,7 +38,6 @@ const resolvers = {
 };
 
 export const main = async (event) => {
-  console.log("JSON Data is ------------", JSON.stringify(event.body));
   const result = await graphql(schema, event.body, resolvers);
   return {statusCode: 200, body: JSON.stringify(result.data, null, 2)};
 };
