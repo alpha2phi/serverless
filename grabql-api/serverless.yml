@@ -33,8 +33,23 @@ provider:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: hello.main
     events:
       - http:
           path: hello
           method: get
+
+  hello_graphql:
+    handler: hello_graphql.main
+    events:
+      - http:
+          path: hello_graphql
+          method: get
+
+  mock_graphql:
+    handler: mock_graphql.main
+    events:
+      - http:
+          path: mock_graphql
+          method: post
+
