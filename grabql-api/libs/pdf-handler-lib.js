@@ -25,13 +25,12 @@ export default function handler(lambda) {
           "Access-Control-Allow-Credentials": true,
         },
       };
-
     }
 
     // Return HTTP response
     return {
       statusCode,
-      body: body.toString('base64'),
+      body: body.toString("base64"),
       isBase64Encoded: true,
       headers: {
         "Content-Type": "application/pdf",

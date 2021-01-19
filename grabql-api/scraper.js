@@ -1,9 +1,18 @@
 import handler from "./libs/pdf-handler-lib";
-import puppeteer from "puppeteer";
+import chromium from "chrome-aws-lambda";
 
 export const main = handler(async (event, context) => {
+  const executablePath = process.env.DEBUG
+    ? null
+    : await chromium.executablePath;
 
-  const browser = await puppeteer.launch({headless: true});
+  console.log("executable is ", executablePath);
+  const browser = await chromium.puppeteer.launch({
+    headless: true,
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath,
+  });
 
   const webpage = await browser.newPage();
 
@@ -11,7 +20,7 @@ export const main = handler(async (event, context) => {
 
   const url = "https://www.google.com";
 
-  await webpage.goto(url, {waitUntil: "networkidle0"});
+  await webpage.goto(url, { waitUntil: "networkidle0" });
 
   const pdf = await webpage.pdf({
     printBackground: true,
@@ -20,8 +29,8 @@ export const main = handler(async (event, context) => {
       top: "20px",
       bottom: "20px",
       left: "20px",
-      right: "20px"
-    }
+      right: "20px",
+    },
   });
 
   await browser.close();

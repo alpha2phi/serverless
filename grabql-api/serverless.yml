@@ -37,8 +37,8 @@ provider:
   # the following line. Also, make sure to not
   # commit your .env.
   #
-  # environment:
-  #   SAMPLE_ENV_VAR: ${env:SAMPLE_ENV_VAR}
+  environment:
+    DEBUG: ${env:DEBUG}
 
 functions:
   scraper:
