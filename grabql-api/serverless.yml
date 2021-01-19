@@ -52,4 +52,3 @@ functions:
       - http:
           path: mock_graphql
           method: post
-
