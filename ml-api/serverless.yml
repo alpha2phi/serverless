@@ -29,6 +29,11 @@ provider:
   runtime: python3.8
   lambdaHashingVersion: 20201221
 
+  # support for all binary media types
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
+
 # you can overwrite defaults here
   stage: dev
   region: ap-southeast-1
