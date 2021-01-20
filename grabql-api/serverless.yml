@@ -55,14 +55,25 @@ provider:
     DEBUG: ${env:DEBUG}
 
 functions:
-  scraper:
+  pdfScraper:
     # provisionedConcurrency: 2
     handler: scraper.pdfScraper
     layers:
       - { Ref: ChromeAwsLambdaLayer }
     events:
       - http:
-          path: scrape
+          path: scrape_pdf
+          method: get
+          request:
+            contentHandling: CONVERT_TO_BINARY
+
+  pngScraper:
+    handler: scraper.pngScraper
+    layers:
+      - { Ref: ChromeAwsLambdaLayer }
+    events:
+      - http:
+          path: scrape_png
           method: get
           request:
             contentHandling: CONVERT_TO_BINARY
