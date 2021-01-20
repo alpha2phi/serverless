@@ -42,7 +42,7 @@ provider:
 
 functions:
   scraper:
-    handler: scraper.main
+    handler: scraper.pdfScraper
     events:
       - http:
           path: scrape

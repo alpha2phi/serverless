@@ -1,27 +1,41 @@
-import handler from "./libs/pdf-handler-lib";
+import pdfHandler from "./libs/pdf-handler-lib";
+// import imageHandler from "./libs/image-handler-lib";
 import chromium from "chrome-aws-lambda";
 
-export const main = handler(async (event, context) => {
-  const executablePath = process.env.DEBUG
-    ? null
-    : await chromium.executablePath;
+export const pdfScraper = pdfHandler(async (event, context) => {
+  if (
+    !event.queryStringParameters ||
+    !event.queryStringParameters.url ||
+    event.queryStringParameters.url.length === 0
+  ) {
+    return new Error("Please supply a valid URL");
+  }
+  const params = {
+    url: event.queryStringParameters.url,
+    width: Number.parseInt(event.queryStringParameters.width) || 1920,
+    height: Number.parseInt(event.queryStringParameters.height) || 1080,
+  };
 
-  console.log("executable is ", executablePath);
+  console.log(params);
+  if (!params.url.startsWith("http")) {
+    params.url = "https://" + params.url;
+  }
+
+  console.log("url is " + params.url);
   const browser = await chromium.puppeteer.launch({
-    headless: true,
+    headless: chromium.headless,
     args: chromium.args,
+    ignoreHTTPSErrors: true,
     defaultViewport: chromium.defaultViewport,
-    executablePath,
+    executablePath: await chromium.executablePath,
   });
 
   const webpage = await browser.newPage();
+  if (params.width > 0 && params.height > 0) {
+    await webpage.setViewport({ width: params.width, height: params.height });
+  }
 
-  // await webpage.setViewport({ width: 1200, height:800 });
-
-  const url = "https://www.google.com";
-
-  await webpage.goto(url, { waitUntil: "networkidle0" });
-
+  await webpage.goto(params.url, { waitUntil: "networkidle0" });
   const pdf = await webpage.pdf({
     printBackground: true,
     format: "Letter",
@@ -34,6 +48,5 @@ export const main = handler(async (event, context) => {
   });
 
   await browser.close();
-
   return pdf;
 });

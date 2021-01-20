@@ -4,7 +4,8 @@
   "description": "Serverless web page information grabber APIs",
   "main": "handler.js",
   "scripts": {
-    "test": "serverless-bundle test"
+    "test": "serverless-bundle test",
+    "offline": "sls offline"
   },
   "author": "alpha2phi",
   "license": "MIT",
