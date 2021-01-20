@@ -8,7 +8,7 @@ export const pdfScraper = pdfHandler(async (event, context) => {
     !event.queryStringParameters.url ||
     event.queryStringParameters.url.length === 0
   ) {
-    return new Error("Please supply a valid URL");
+    throw new Error("Please supply a valid URL");
   }
   const params = {
     url: event.queryStringParameters.url,
@@ -16,37 +16,42 @@ export const pdfScraper = pdfHandler(async (event, context) => {
     height: Number.parseInt(event.queryStringParameters.height) || 1080,
   };
 
-  console.log(params);
   if (!params.url.startsWith("http")) {
     params.url = "https://" + params.url;
   }
 
-  console.log("url is " + params.url);
-  const browser = await chromium.puppeteer.launch({
-    headless: chromium.headless,
-    args: chromium.args,
-    ignoreHTTPSErrors: true,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
-  });
+  let browser = null;
+  try {
+    const browser = await chromium.puppeteer.launch({
+      headless: chromium.headless,
+      args: chromium.args,
+      ignoreHTTPSErrors: true,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+    });
 
-  const webpage = await browser.newPage();
-  if (params.width > 0 && params.height > 0) {
-    await webpage.setViewport({ width: params.width, height: params.height });
+    const webpage = await browser.newPage();
+    if (params.width > 0 && params.height > 0) {
+      await webpage.setViewport({ width: params.width, height: params.height });
+    }
+
+    await webpage.goto(params.url, { waitUntil: "networkidle0" });
+    const pdf = await webpage.pdf({
+      printBackground: true,
+      format: "Letter",
+      margin: {
+        top: "20px",
+        bottom: "20px",
+        left: "20px",
+        right: "20px",
+      },
+    });
+    return pdf;
+  } catch (error) {
+    throw new Error(error.message);
+  } finally {
+    if (browser !== null) {
+      await browser.close();
+    }
   }
-
-  await webpage.goto(params.url, { waitUntil: "networkidle0" });
-  const pdf = await webpage.pdf({
-    printBackground: true,
-    format: "Letter",
-    margin: {
-      top: "20px",
-      bottom: "20px",
-      left: "20px",
-      right: "20px",
-    },
-  });
-
-  await browser.close();
-  return pdf;
 });
