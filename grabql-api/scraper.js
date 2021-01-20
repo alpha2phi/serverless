@@ -89,7 +89,6 @@ export const pngScraper = pngHandler(async (event, context) => {
     }
     await webpage.goto(params.url, { waitUntil: "networkidle0" });
 
-    console.log(params);
     const png = await webpage.screenshot({
       fullPage: true,
     });
