@@ -58,6 +58,7 @@ functions:
   pdfScraper:
     # provisionedConcurrency: 2
     handler: scraper.pdfScraper
+    timeout: 60
     layers:
       - { Ref: ChromeAwsLambdaLayer }
     events:
@@ -69,6 +70,7 @@ functions:
 
   pngScraper:
     handler: scraper.pngScraper
+    timeout: 60
     layers:
       - { Ref: ChromeAwsLambdaLayer }
     events:
