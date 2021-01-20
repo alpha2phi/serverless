@@ -22,7 +22,7 @@ export const pdfScraper = pdfHandler(async (event, context) => {
 
   let browser = null;
   try {
-    const browser = await chromium.puppeteer.launch({
+    browser = await chromium.puppeteer.launch({
       headless: chromium.headless,
       args: chromium.args,
       ignoreHTTPSErrors: true,

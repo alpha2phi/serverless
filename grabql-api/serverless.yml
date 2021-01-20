@@ -13,9 +13,23 @@ plugins:
   - serverless-offline
   - serverless-dotenv-plugin # Load .env as environment variables
 
+layers:
+  ChromeAws:
+    name: ChromeAws
+    compatibleRuntimes:
+      - nodejs12.x
+    description: Chrome AWS Lambda
+    package:
+      artifact: layers/chrome_aws_lambda.zip
+
 custom:
   region: ${opt:region, self:provider.region}
   stage: ${opt:stage, self:provider.stage}
+  bundle:
+    forceExclude:
+      - chrome-aws-lambda
+  serverless-offline:
+    location: .webpack/service
 
 provider:
   name: aws
@@ -42,7 +56,10 @@ provider:
 
 functions:
   scraper:
+    # provisionedConcurrency: 2
     handler: scraper.pdfScraper
+    layers:
+      - { Ref: ChromeAwsLambdaLayer }
     events:
       - http:
           path: scrape
