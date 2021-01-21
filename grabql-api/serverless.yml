@@ -28,6 +28,7 @@ custom:
   bundle:
     forceExclude:
       - chrome-aws-lambda
+      - puppeteer-core
   serverless-offline:
     location: .webpack/service
 
@@ -58,27 +59,31 @@ functions:
   pdfScraper:
     # provisionedConcurrency: 2
     handler: scraper.pdfScraper
-    timeout: 60
+    timeout: 30
     layers:
       - { Ref: ChromeAwsLambdaLayer }
     events:
       - http:
           path: scrape_pdf
           method: get
-          request:
-            contentHandling: CONVERT_TO_BINARY
+          # request:
+            # contentHandling: CONVERT_TO_TEXT
+          # response:
+            # contentHandling: CONVERT_TO_BINARY
 
   pngScraper:
     handler: scraper.pngScraper
-    timeout: 60
+    timeout: 30
     layers:
       - { Ref: ChromeAwsLambdaLayer }
     events:
       - http:
           path: scrape_png
           method: get
-          request:
-            contentHandling: CONVERT_TO_BINARY
+          # request:
+            # contentHandling: CONVERT_TO_TEXT
+          # response:
+            # contentHandling: CONVERT_TO_BINARY
 
   # hello:
   #   handler: hello.main
