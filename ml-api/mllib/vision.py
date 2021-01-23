@@ -4,6 +4,7 @@ import base64
 import torch
 from PIL import Image
 from torchvision import transforms
+from requests_toolbelt.multipart import decoder
 
 IMG_SIZE = 512
 
@@ -12,8 +13,32 @@ model.eval()
 
 
 def predict_segment(event, context):
-    filename = "./test_images/deeplab1.png"
-    input_image = Image.open(filename).convert("RGB")
+    input_image = None
+    print(event.keys())
+    content_type_header = event["headers"]["Content-Type"]
+    body = event["body"].encode()
+    # print("body type", type(body))
+    # print("body --- ", body[0:200])
+
+    for part in decoder.MultipartDecoder(body, content_type_header).parts:
+        content_type_part = part.headers[b"Content-Type"]
+        # print("part type --", type(part.content))
+        # print("content ---", part.content[0:100])
+        print("part headers ---", part.headers.keys())
+
+        if (
+            b"image/png" in content_type_part
+            or b"image/jpg" in content_type_part
+            or b"image/jpeg" in content_type_part
+        ):
+            f = open("./test_images/uploaded.png", "wb")
+            f.write(part.content)
+            f.close()
+            input_image = Image.open(io.BytesIO(part.content)).convert("RGB")
+
+    if input_image is None:
+        raise RuntimeError("No image provided")
+
     width, height = input_image.size
     resize_factor = min(IMG_SIZE / width, IMG_SIZE / height)
     input_image = input_image.resize(
@@ -67,24 +92,32 @@ def base64_encode_img(img):
 
 
 def main(event, context):
-    print(event)
+    # if event is not None:
+    #     print(event["body"][0:500])
+
+    if event and event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+        print("Lambda container is up and running")
+        return {}
 
     try:
         output_image = predict_segment(event, context)
         response = {
             "statusCode": 200,
-            "body": {"image": base64_encode_img(output_image)},
+            # "body": json.dumps({"image": base64_encode_img(output_image)}),
+            "body": base64_encode_img(output_image),
+            "isBase64Encoded": True,
             "headers": {
-                "Content-Type": "application/json",
+                "Content-Type": "application/png",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Credentials": True,
             },
         }
+        # print(response)
         return response
     except RuntimeError as e:
         response = {
             "statusCode": 500,
-            "body": {"error": e},
+            "body": json.dumps({"error": e}),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",

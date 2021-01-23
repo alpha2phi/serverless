@@ -27,6 +27,9 @@ functions:
       - httpApi:
           path: /vision
           method: post
+          request:
+            contentHandling: CONVERT_TO_BINARY
+
   hello:
     handler: mllib/hello.main
     events:

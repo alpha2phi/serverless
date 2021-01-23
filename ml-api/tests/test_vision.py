@@ -1,5 +1,6 @@
 import unittest
-from ..mllib import vision
+
+# from ..mllib import vision
 
 
 class TestVision(unittest.TestCase):
@@ -9,7 +10,8 @@ class TestVision(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_vision(self):
-        response = vision.main(None, None)
-        assert response["statusCode"] == 200
-        # print(response)
+
+#     def test_vision(self):
+#         response = vision.main(None, None)
+#         assert response["statusCode"] == 200
+#         # print(response)
