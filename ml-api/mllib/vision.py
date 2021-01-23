@@ -14,26 +14,19 @@ model.eval()
 
 def predict_segment(event, context):
     input_image = None
-    print(event.keys())
     content_type_header = event["headers"]["Content-Type"]
     body = event["body"].encode()
-    # print("body type", type(body))
-    # print("body --- ", body[0:200])
 
     for part in decoder.MultipartDecoder(body, content_type_header).parts:
         content_type_part = part.headers[b"Content-Type"]
-        # print("part type --", type(part.content))
-        # print("content ---", part.content[0:100])
-        print("part headers ---", part.headers.keys())
-
         if (
             b"image/png" in content_type_part
             or b"image/jpg" in content_type_part
             or b"image/jpeg" in content_type_part
         ):
-            f = open("./test_images/uploaded.png", "wb")
-            f.write(part.content)
-            f.close()
+            # f = open("./test_images/uploaded.png", "wb")
+            # f.write(part.content)
+            # f.close()
             input_image = Image.open(io.BytesIO(part.content)).convert("RGB")
 
     if input_image is None:

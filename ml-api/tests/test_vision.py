@@ -1,6 +1,5 @@
 import unittest
-
-# from ..mllib import vision
+from PIL import Image
 
 
 class TestVision(unittest.TestCase):
@@ -10,8 +9,5 @@ class TestVision(unittest.TestCase):
     def tearDown(self):
         pass
 
-
-#     def test_vision(self):
-#         response = vision.main(None, None)
-#         assert response["statusCode"] == 200
-#         # print(response)
+    def test_vision(self):
+        Image.open("./test_images/uploaded.png")
