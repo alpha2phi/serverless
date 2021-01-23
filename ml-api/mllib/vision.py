@@ -1,15 +1,27 @@
 import json
+import io
+import base64
 import torch
 from PIL import Image
 from torchvision import transforms
+
+IMG_SIZE = 512
 
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
 model.eval()
 
 
-def main(event, context):
-    filename = "test_images/human.jpg"
-    input_image = Image.open(filename)
+def predict_segment(event, context):
+    filename = "./test_images/deeplab1.png"
+    input_image = Image.open(filename).convert("RGB")
+    width, height = input_image.size
+    resize_factor = min(IMG_SIZE / width, IMG_SIZE / height)
+    input_image = input_image.resize(
+        (
+            int(input_image.width * resize_factor),
+            int(input_image.height * resize_factor),
+        )
+    )
     preprocess = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -37,10 +49,46 @@ def main(event, context):
     colors = (colors % 255).numpy().astype("uint8")
 
     # plot the semantic segmentation predictions of 21 classes in each color
-    r = Image.fromarray(output_predictions.byte().cpu().numpy()).resize(
+    segments = Image.fromarray(output_predictions.byte().cpu().numpy()).resize(
         input_image.size
     )
-    r.putpalette(colors)
+    segments.putpalette(colors)
+    return segments
 
-    # Save the image locally
-    r.save("test.png")
+
+def base64_encode_img(img):
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    buffered.seek(0)
+    img_byte = buffered.getvalue()
+    # encoded_img_str = "data:image/png;base64," + base64.b64encode(img_byte).decode()
+    encoded_img_str = base64.b64encode(img_byte).decode()
+    return encoded_img_str
+
+
+def main(event, context):
+    print(event)
+
+    try:
+        output_image = predict_segment(event, context)
+        response = {
+            "statusCode": 200,
+            "body": {"image": base64_encode_img(output_image)},
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
+        }
+        return response
+    except RuntimeError as e:
+        response = {
+            "statusCode": 500,
+            "body": {"error": e},
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
+        }
+        return response
