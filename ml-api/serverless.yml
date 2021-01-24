@@ -36,19 +36,22 @@ plugins:
 custom:
   region: ${opt:region, self:provider.region}
   stage: ${opt:stage, self:provider.stage}
-  custom:
-    pythonRequirements:
-      dockerizepip: true
-      zip: true
-      slim: true
-      strip: false
-      nodeploy:
-        - pip
-        - setuptools
-        - six
-      usestaticcache: true
-      usedownloadcache: true
-      cachelocation: "./cache"
+  pythonRequirements:
+    dockerizepip: true
+    zip: true
+    slim: true
+    strip: false
+    nodeploy:
+      - pip
+      - setuptools
+      - six
+    usestaticcache: true
+    usedownloadcache: true
+    cachelocation: "./.cache"
+  warmup:
+    events:
+      - schedule: "rate(5 minutes)"
+    timeout: 50
 
 provider:
   name: aws
@@ -67,13 +70,15 @@ provider:
 functions:
   vision:
     handler: mllib/vision.main
-    timeout: 30
+    memorySize: 3008
+    timeout: 300
     # layers:
     #   - { Ref: TorchHubLambdaLayer }
     events:
       - httpApi:
           path: /vision
           method: post
+    warmup: true
 
   # hello:
   #   handler: mllib/hello.main

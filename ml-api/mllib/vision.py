@@ -1,3 +1,12 @@
+try:
+    print("unzipping requirements")
+    import unzip_requirements
+
+    print("done")
+except ImportError:
+    print("error unzipping")
+    pass
+
 import json
 import io
 import base64
@@ -7,7 +16,7 @@ from torchvision import transforms
 from requests_toolbelt.multipart import decoder
 
 
-torch.hub.set_dir("./cache")
+torch.hub.set_dir("./.cache")
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
 model.eval()
 
@@ -91,12 +100,11 @@ def predict(event, context):
 
 
 def main(event, context):
-    # if event is not None:
-    #     print(event["body"][0:500])
 
-    # if event and event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
-    #     print("Lambda container is up and running")
-    #     return {}
+    # warm up
+    if event and event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+        print("Lambda container is up and running")
+        return {}
 
     try:
         output_image = predict(event, context)

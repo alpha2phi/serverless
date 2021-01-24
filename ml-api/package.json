@@ -5,6 +5,7 @@
   "dependencies": {},
   "devDependencies": {
     "serverless-offline": "^6.8.0",
+    "serverless-plugin-warmup": "^5.0.0",
     "serverless-python-requirements": "^5.1.0"
   }
 }
