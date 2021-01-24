@@ -22,22 +22,13 @@ package:
 plugins:
   - serverless-python-requirements
   - serverless-offline
-  # - serverless-plugin-warmup
-
-# layers:
-#   TorchHub:
-#     name: TorchHub
-#     compatibleRuntimes:
-#       - python3.8
-#     description: PyTorch Hub
-#     package:
-#       artifact: layers/torch.zip
+  - serverless-plugin-warmup
 
 custom:
   region: ${opt:region, self:provider.region}
   stage: ${opt:stage, self:provider.stage}
   pythonRequirements:
-    dockerizepip: true
+    dockerizePip: true
     zip: true
     slim: true
     strip: false
@@ -48,15 +39,26 @@ custom:
     usestaticcache: true
     usedownloadcache: true
     cachelocation: "./.cache"
+    # layer: true
+
   warmup:
     events:
       - schedule: "rate(5 minutes)"
     timeout: 50
+    default:
+      enabled: true
+      role: IamRoleLambdaExecution
 
 provider:
   name: aws
   runtime: python3.8
   lambdaHashingVersion: 20201221
+  timeout: 60
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "lambda:InvokeFunction"
+      Resource: "*"
 
   # support for all binary media types
   apiGateway:
@@ -73,12 +75,14 @@ functions:
     memorySize: 3008
     timeout: 300
     # layers:
-    #   - { Ref: TorchHubLambdaLayer }
+    #   - { Ref: PythonRequirementsLambdaLayer }
     events:
       - httpApi:
           path: /vision
           method: post
-    warmup: true
+    warmup:
+      default:
+        enabled: true
 
   # hello:
   #   handler: mllib/hello.main
@@ -86,4 +90,3 @@ functions:
   #     - httpApi:
   #         path: /hello
   #         method: get
-
