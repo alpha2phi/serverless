@@ -1,6 +1,22 @@
 service: ml-api
 
-frameworkVersion: '2'
+# Create an optimized package for our functions
+package:
+  individually: true
+
+plugins:
+  - serverless-python-requirements
+  - serverless-offline
+  - serverless-plugin-warmup
+
+layers:
+  ChromeAws:
+    name: TorchHub
+    compatibleRuntimes:
+      - python3.8
+    description: PyTorch Hub
+    package:
+      artifact: layers/torch.zip
 
 custom:
   region: ${opt:region, self:provider.region}
@@ -23,19 +39,18 @@ provider:
 functions:
   vision:
     handler: mllib/vision.main
+    timeout: 30
+    layers:
+      - { Ref: TorchHubLambdaLayer }
     events:
       - httpApi:
           path: /vision
           method: post
 
-  hello:
-    handler: mllib/hello.main
-    events:
-      - httpApi:
-          path: /hello
-          method: get
+  # hello:
+  #   handler: mllib/hello.main
+  #   events:
+  #     - httpApi:
+  #         path: /hello
+  #         method: get
 
-plugins:
-  - serverless-python-requirements
-  - serverless-offline
-  - serverless-plugin-warmup
