@@ -8,6 +8,7 @@ from requests_toolbelt.multipart import decoder
 
 IMG_SIZE = 512
 
+torch.hub.set_dir("./cache")
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
 model.eval()
 
@@ -88,9 +89,9 @@ def main(event, context):
     # if event is not None:
     #     print(event["body"][0:500])
 
-    if event and event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
-        print("Lambda container is up and running")
-        return {}
+    # if event and event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+    #     print("Lambda container is up and running")
+    #     return {}
 
     try:
         output_image = predict_segment(event, context)

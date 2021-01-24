@@ -22,3 +22,4 @@ var/
 __pycache__/
 
 torch.zip
+cache/
