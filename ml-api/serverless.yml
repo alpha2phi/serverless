@@ -5,10 +5,12 @@ package:
   individually: true
   exclude:
     - package.json
-    - package-log.json
+    - package-lock.json
     - node_modules/**
     - cache/**
-    - test/**
+    - tests/**
+    - test_images/**
+    - layers/**
     - __pycache__/**
 
 plugins:
