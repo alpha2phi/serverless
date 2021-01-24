@@ -3,7 +3,14 @@ service: ml-api
 # Create an optimized package for our functions
 package:
   individually: true
+  excludeDevDependencies: true
   exclude:
+    - mllib/__pycache__/**
+    - mllib/test_images/**
+    - mllib/hello.py
+    - mllib/__pycache__/**
+    - __pycache__/**
+    - .DS_Store
     - package.json
     - package-lock.json
     - node_modules/**
@@ -11,39 +18,37 @@ package:
     - tests/**
     - test_images/**
     - layers/**
-    - __pycache__/**
 
 plugins:
   - serverless-python-requirements
   - serverless-offline
   # - serverless-plugin-warmup
 
-layers:
-  TorchHub:
-    name: TorchHub
-    compatibleRuntimes:
-      - python3.8
-    description: PyTorch Hub
-    package:
-      artifact: layers/torch.zip
+# layers:
+#   TorchHub:
+#     name: TorchHub
+#     compatibleRuntimes:
+#       - python3.8
+#     description: PyTorch Hub
+#     package:
+#       artifact: layers/torch.zip
 
 custom:
   region: ${opt:region, self:provider.region}
   stage: ${opt:stage, self:provider.stage}
-
   custom:
     pythonRequirements:
-    dockerizePip: true
-    zip: true
-    slim: true
-    strip: false
-    noDeploy:
-      - pip
-      - setuptools
-      - six
-    useStaticCache: true
-    useDownloadCache: true
-    cacheLocation: "./cache"
+      dockerizepip: true
+      zip: true
+      slim: true
+      strip: false
+      nodeploy:
+        - pip
+        - setuptools
+        - six
+      usestaticcache: true
+      usedownloadcache: true
+      cachelocation: "./cache"
 
 provider:
   name: aws
@@ -63,8 +68,8 @@ functions:
   vision:
     handler: mllib/vision.main
     timeout: 30
-    layers:
-      - { Ref: TorchHubLambdaLayer }
+    # layers:
+    #   - { Ref: TorchHubLambdaLayer }
     events:
       - httpApi:
           path: /vision
