@@ -1,5 +1,6 @@
 import unittest
 from PIL import Image
+from ..mllib import vision
 
 
 class TestVision(unittest.TestCase):
@@ -10,4 +11,6 @@ class TestVision(unittest.TestCase):
         pass
 
     def test_vision(self):
-        Image.open("./test_images/uploaded.png")
+        input_image = Image.open("./test_images/human.jpg")
+        output_image = vision.get_segments(input_image)
+        output_image.save("./test_images/output.png")

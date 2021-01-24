@@ -17,7 +17,7 @@ plugins:
   # - serverless-plugin-warmup
 
 layers:
-  ChromeAws:
+  TorchHub:
     name: TorchHub
     compatibleRuntimes:
       - python3.8

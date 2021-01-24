@@ -6,33 +6,25 @@ from PIL import Image
 from torchvision import transforms
 from requests_toolbelt.multipart import decoder
 
-IMG_SIZE = 512
 
 torch.hub.set_dir("./cache")
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
 model.eval()
 
+IMG_SIZE = 512
 
-def predict_segment(event, context):
-    input_image = None
-    content_type_header = event["headers"]["Content-Type"]
-    body = event["body"].encode()
 
-    for part in decoder.MultipartDecoder(body, content_type_header).parts:
-        content_type_part = part.headers[b"Content-Type"]
-        if (
-            b"image/png" in content_type_part
-            or b"image/jpg" in content_type_part
-            or b"image/jpeg" in content_type_part
-        ):
-            # f = open("./test_images/uploaded.png", "wb")
-            # f.write(part.content)
-            # f.close()
-            input_image = Image.open(io.BytesIO(part.content)).convert("RGB")
+def base64_encode_img(img):
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    buffered.seek(0)
+    img_byte = buffered.getvalue()
+    # encoded_img_str = "data:image/png;base64," + base64.b64encode(img_byte).decode()
+    encoded_img_str = base64.b64encode(img_byte).decode()
+    return encoded_img_str
 
-    if input_image is None:
-        raise RuntimeError("No image provided")
 
+def get_segments(input_image):
     width, height = input_image.size
     resize_factor = min(IMG_SIZE / width, IMG_SIZE / height)
     input_image = input_image.resize(
@@ -75,14 +67,27 @@ def predict_segment(event, context):
     return segments
 
 
-def base64_encode_img(img):
-    buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
-    buffered.seek(0)
-    img_byte = buffered.getvalue()
-    # encoded_img_str = "data:image/png;base64," + base64.b64encode(img_byte).decode()
-    encoded_img_str = base64.b64encode(img_byte).decode()
-    return encoded_img_str
+def predict(event, context):
+    input_image = None
+    content_type_header = event["headers"]["Content-Type"]
+    body = event["body"].encode()
+
+    for part in decoder.MultipartDecoder(body, content_type_header).parts:
+        content_type_part = part.headers[b"Content-Type"]
+        if (
+            b"image/png" in content_type_part
+            or b"image/jpg" in content_type_part
+            or b"image/jpeg" in content_type_part
+        ):
+            # f = open("./test_images/uploaded.png", "wb")
+            # f.write(part.content)
+            # f.close()
+            input_image = Image.open(io.BytesIO(part.content)).convert("RGB")
+
+    if input_image is None:
+        raise RuntimeError("No image provided")
+
+    return get_segments(input_image)
 
 
 def main(event, context):
@@ -94,7 +99,7 @@ def main(event, context):
     #     return {}
 
     try:
-        output_image = predict_segment(event, context)
+        output_image = predict(event, context)
         response = {
             "statusCode": 200,
             # "body": json.dumps({"image": base64_encode_img(output_image)}),
