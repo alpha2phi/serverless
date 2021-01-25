@@ -54,6 +54,8 @@ provider:
   runtime: python3.7
   lambdaHashingVersion: 20201221
   timeout: 60
+  iamManagedPolicies:
+    - arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -75,8 +77,6 @@ functions:
     fileSystemConfig:
       localMountPath: /mnt/efs
       arn: arn:aws:elasticfilesystem:ap-southeast-1:450266975445:access-point/fsap-069947df394f6436c
-    iamManagedPolicies:
-      - arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess
     vpc:
       securityGroupIds:
         - sg-9cae01ec

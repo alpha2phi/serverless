@@ -1,4 +1,12 @@
 try:
+    import sys
+    import os
+
+    sys.path.append("/mnt/efs/lib")  # nopep8 # noqa
+except ImportError:
+    pass
+
+try:
     import unzip_requirements
 except ImportError:
     pass
@@ -14,11 +22,10 @@ from requests_toolbelt.multipart import decoder
 print(f"Pytorch version - {torch.__version__}")
 
 torch.hub.set_dir("/mnt/efs/.cache")
-
-print("dir set")
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
-print("loaded model")
 model.eval()
+
+print("Model is loaded successfully.")
 
 IMG_SIZE = 512
 
@@ -78,19 +85,16 @@ def get_segments(input_image):
 
 def predict(event, context):
     input_image = None
-    content_type_header = event["headers"]["Content-Type"]
+    content_type_header = event["headers"]["content-type"]
     body = event["body"].encode()
 
     for part in decoder.MultipartDecoder(body, content_type_header).parts:
-        content_type_part = part.headers[b"Content-Type"]
+        content_type_part = part.headers[b"content-type"]
         if (
             b"image/png" in content_type_part
             or b"image/jpg" in content_type_part
             or b"image/jpeg" in content_type_part
         ):
-            # f = open("./test_images/uploaded.png", "wb")
-            # f.write(part.content)
-            # f.close()
             input_image = Image.open(io.BytesIO(part.content)).convert("RGB")
 
     if input_image is None:
