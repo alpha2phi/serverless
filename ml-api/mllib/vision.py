@@ -1,10 +1,6 @@
 try:
-    print("unzipping requirements")
     import unzip_requirements
-
-    print("done")
 except ImportError:
-    print("error unzipping")
     pass
 
 import json
@@ -15,9 +11,13 @@ from PIL import Image
 from torchvision import transforms
 from requests_toolbelt.multipart import decoder
 
+print(f"Pytorch version - {torch.__version__}")
 
-torch.hub.set_dir("./.cache")
+torch.hub.set_dir("/mnt/efs/.cache")
+
+print("dir set")
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
+print("loaded model")
 model.eval()
 
 IMG_SIZE = 512

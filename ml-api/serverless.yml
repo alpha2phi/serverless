@@ -38,7 +38,7 @@ custom:
       - six
     usestaticcache: true
     usedownloadcache: true
-    cachelocation: "./.cache"
+    cachelocation: "/mnt/efs/.cache"
     # layer: true
 
   warmup:
@@ -51,7 +51,7 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.7
   lambdaHashingVersion: 20201221
   timeout: 60
   iamRoleStatements:
@@ -72,6 +72,16 @@ provider:
 functions:
   vision:
     handler: mllib/vision.main
+    fileSystemConfig:
+      localMountPath: /mnt/efs
+      arn: arn:aws:elasticfilesystem:ap-southeast-1:450266975445:access-point/fsap-069947df394f6436c
+    iamManagedPolicies:
+      - arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess
+    vpc:
+      securityGroupIds:
+        - sg-9cae01ec
+      subnetIds:
+        - subnet-ee22e788
     memorySize: 3008
     timeout: 300
     # layers:
