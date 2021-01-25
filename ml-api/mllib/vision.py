@@ -1,11 +1,13 @@
+# Load from EFS mounted folder
 try:
     import sys
     import os
 
-    sys.path.append("/mnt/efs/lib")  # nopep8 # noqa
+    sys.path.append("/mnt/efs/lib")
 except ImportError:
     pass
 
+# Load from /tmp
 try:
     import unzip_requirements
 except ImportError:
@@ -17,9 +19,8 @@ import base64
 import torch
 from PIL import Image
 from torchvision import transforms
-from requests_toolbelt.multipart import decoder
 
-print(f"Pytorch version - {torch.__version__}")
+print(f"Pytorch version is {torch.__version__}")
 
 torch.hub.set_dir("/mnt/efs/.cache")
 model = torch.hub.load("pytorch/vision:v0.6.0", "deeplabv3_resnet101", pretrained=True)
@@ -35,9 +36,9 @@ def base64_encode_img(img):
     img.save(buffered, format="PNG")
     buffered.seek(0)
     img_byte = buffered.getvalue()
-    # encoded_img_str = "data:image/png;base64," + base64.b64encode(img_byte).decode()
-    encoded_img_str = base64.b64encode(img_byte).decode()
-    return encoded_img_str
+    # encoded = "data:image/png;base64," + base64.b64encode(img_byte).decode()
+    encoded = base64.b64encode(img_byte).decode()
+    return encoded
 
 
 def get_segments(input_image):
@@ -84,22 +85,11 @@ def get_segments(input_image):
 
 
 def predict(event, context):
-    input_image = None
-    content_type_header = event["headers"]["content-type"]
-    body = event["body"].encode()
-
-    for part in decoder.MultipartDecoder(body, content_type_header).parts:
-        content_type_part = part.headers[b"content-type"]
-        if (
-            b"image/png" in content_type_part
-            or b"image/jpg" in content_type_part
-            or b"image/jpeg" in content_type_part
-        ):
-            input_image = Image.open(io.BytesIO(part.content)).convert("RGB")
-
-    if input_image is None:
-        raise RuntimeError("No image provided")
-
+    body = json.loads(event["body"])
+    image = body["image"]
+    # image = image[image.find(",") + 1 :]
+    decoded = base64.b64decode(image)
+    input_image = Image.open(io.BytesIO(decoded)).convert("RGB")
     return get_segments(input_image)
 
 
@@ -112,10 +102,11 @@ def main(event, context):
 
     try:
         output_image = predict(event, context)
+        encoded_img = base64_encode_img(output_image)
         response = {
             "statusCode": 200,
-            # "body": json.dumps({"image": base64_encode_img(output_image)}),
-            "body": base64_encode_img(output_image),
+            # "body": json.dumps({"image": encoded_img}),
+            "body": encoded_img,
             "isBase64Encoded": True,
             "headers": {
                 "Content-Type": "application/png",
@@ -123,12 +114,11 @@ def main(event, context):
                 "Access-Control-Allow-Credentials": True,
             },
         }
-        # print(response)
         return response
     except RuntimeError as e:
         response = {
             "statusCode": 500,
-            "body": json.dumps({"error": e}),
+            "body": json.dumps({"error": str(e)}),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",

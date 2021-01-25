@@ -93,10 +93,3 @@ functions:
     warmup:
       default:
         enabled: true
-
-  # hello:
-  #   handler: mllib/hello.main
-  #   events:
-  #     - httpApi:
-  #         path: /hello
-  #         method: get
