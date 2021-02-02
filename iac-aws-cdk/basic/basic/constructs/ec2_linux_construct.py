@@ -27,17 +27,20 @@ class EC2Linux(core.Construct):
             storage=ec2.AmazonLinuxStorage.GENERAL_PURPOSE
             )
 
-        # Instance Role and SSM Managed Policy
-        role = iam.Role(self, "InstanceSSM", assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"))
-
-        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonEC2RoleforSSM"))
+        # Security group
+        sec_group = ec2.SecurityGroup(self, "SecurityGroup", vpc=vpc,
+                                      description="Allow ssh access to ec2 instances",
+                                      allow_all_outbound=True
+                                      )
+        # Beware this allow ssh from anywhere!!!
+        sec_group.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
 
         # Instance
         instance = ec2.Instance(self, "Instance",
             instance_type=ec2.InstanceType("t2.micro"),
             machine_image=amzn_linux,
             vpc = vpc,
-            role = role
+            security_group=sec_group
             )
 
         # Script in S3 as Asset
@@ -48,7 +51,7 @@ class EC2Linux(core.Construct):
         )
 
         # Userdata executes script from S3
-        # instance.user_data.add_execute_file_command(
-        #     file_path=local_path
-        #     )
-        # asset.grant_read(instance.role)
+        instance.user_data.add_execute_file_command(
+            file_path=local_path
+            )
+        asset.grant_read(instance.role)
