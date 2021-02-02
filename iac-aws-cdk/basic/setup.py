@@ -24,6 +24,7 @@ setuptools.setup(
         "aws-cdk.aws_sns==1.87.1",
         "aws-cdk.aws_sns_subscriptions==1.87.1",
         "aws-cdk.aws_s3==1.87.1",
+        "aws-cdk.aws_s3_deployment==1.87.1",
         "aws-cdk.aws_apigateway==1.87.1",
         "aws-cdk.aws_dynamodb==1.87.1"
     ],
