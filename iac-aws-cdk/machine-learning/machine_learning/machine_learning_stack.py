@@ -1,10 +1,6 @@
-from aws_cdk import (
-    aws_iam as iam,
-    aws_sqs as sqs,
-    aws_sns as sns,
-    aws_sns_subscriptions as subs,
-    core
-)
+from aws_cdk import core
+
+from .constructs import MLEfs, MLVpc
 
 
 class MachineLearningStack(core.Stack):
@@ -12,13 +8,15 @@ class MachineLearningStack(core.Stack):
     def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        queue = sqs.Queue(
-            self, "MachineLearningQueue",
-            visibility_timeout=core.Duration.seconds(300),
+        # Create VPC
+        vpc_construct = MLVpc(self, "ml-vpc")
+
+        # Create EFS
+        efs_stack = MLEfs(
+            self,
+            "ml-efs",
+            vpc=vpc_construct.vpc
         )
 
-        topic = sns.Topic(
-            self, "MachineLearningTopic"
-        )
+        # Install machine learning libraries
 
-        topic.add_subscription(subs.SqsSubscription(queue))
