@@ -33,10 +33,10 @@ class MLLib(core.Construct):
         user_data_part_02 = f"sudo mount -t efs -o tls {efs_share.file_system_id}:/ /machine_learning"
         user_data_part_03 = ("""
                         sudo mkdir -p ${ML_LIB_HOME}
-                        sudo chown -R ${EFS_USER_ID}:${EFS_USER_ID} ${ML_LIB_HOME}
                         cd ${ML_LIB_HOME}
                         sudo pip3 install --no-cache-dir -U -t ${ML_LIB_HOME}/libs https://download.pytorch.org/whl/cpu/torch-1.7.1%2Bcpu-cp37-cp37m-linux_x86_64.whl
                         sudo pip3 install --no-cache-dir -U -t ${ML_LIB_HOME}/libs https://download.pytorch.org/whl/cpu/torchvision-0.8.2%2Bcpu-cp37-cp37m-linux_x86_64.whl
+                        sudo chown -R ${EFS_USER_ID}:${EFS_USER_ID} ${ML_LIB_HOME}
                         """
                              )
 
