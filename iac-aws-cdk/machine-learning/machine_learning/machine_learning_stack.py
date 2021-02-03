@@ -1,6 +1,6 @@
 from aws_cdk import core
 
-from .constructs import MLEfs, MLVpc
+from .constructs import MLEfs, MLLib, MLVpc
 
 
 class MachineLearningStack(core.Stack):
@@ -12,11 +12,18 @@ class MachineLearningStack(core.Stack):
         vpc_construct = MLVpc(self, "ml-vpc")
 
         # Create EFS
-        efs_stack = MLEfs(
+        efs_construct = MLEfs(
             self,
             "ml-efs",
             vpc=vpc_construct.vpc
         )
 
         # Install machine learning libraries
-
+        lib_construct = MLLib(
+            self,
+            "ml-lib",
+            vpc=vpc_construct.vpc,
+            ec2_instance_type="t2.micro",
+            efs_share=efs_construct.efs_share,
+            efs_sg=efs_construct.efs_sg
+        )
