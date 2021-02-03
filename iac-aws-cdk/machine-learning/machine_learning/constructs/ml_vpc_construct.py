@@ -7,7 +7,7 @@ from aws_cdk.aws_s3_assets import Asset
 
 dirname = os.path.dirname(__file__)
 
-class VpcML(core.Construct):
+class MLVpc(core.Construct):
 
     def __init__(self, scope: core.Construct, id: str, **kwargs):
         super().__init__(scope, id, **kwargs)
