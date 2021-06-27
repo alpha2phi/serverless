@@ -47,7 +47,7 @@ class SageMakerNotebookStruct(core.Construct):
             self,
             "notebookAccessPolicy",
             policy_name="notebookAccessPolicy",
-            statements=[iam_.PolicyStatement(actions=['s3:*', ], resources=['*', ]), ]).attach_to_role(nRole)
+            statements=[iam_.PolicyStatement(actions=['s3:*', 'sagemaker:*'], resources=['*', ]), ]).attach_to_role(nRole)
 
         # Create notebook instances cluster
         nid = 'CDK-Notebook-Instance-ML-1'
