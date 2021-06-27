@@ -9,4 +9,4 @@ class SageMakerStack(core.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # Create SageMaker notebook
-        sm_notebook_construct = SageMakerNotebookStruct(self, "ml-vpc")
+        sm_notebook_construct = SageMakerNotebookStruct(self, "alpha2phi-sm-notebook")
