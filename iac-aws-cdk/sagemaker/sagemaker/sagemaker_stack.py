@@ -1,23 +1,10 @@
-from aws_cdk import (aws_iam as iam, aws_sqs as sqs, aws_sns as sns,
-                     aws_sns_subscriptions as subs, core)
+from aws_cdk import (aws_iam as iam, core)
 
 
 class SagemakerStack(core.Stack):
     def __init__(self, scope: core.Construct, construct_id: str,
                  **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        queue = sqs.Queue(
-            self,
-            "SagemakerQueue",
-            visibility_timeout=core.Duration.seconds(300),
-        )
-
-        topic = sns.Topic(self, "SagemakerTopic")
-
-        topic.add_subscription(subs.SqsSubscription(queue))
-
-        # -----
 
         # VPC
         self.vpc = ec2.Vpc(
@@ -50,20 +37,20 @@ class SagemakerStack(core.Stack):
 
         # IAM Roles
         # Create role for Notebook instance
-        nRole = iam_.Role(self,
-                          "notebookAccessRole",
-                          assumed_by=iam_.ServicePrincipal('sagemaker'))
+        nRole = iam.Role(self,
+                         "notebookAccessRole",
+                         assumed_by=iam.ServicePrincipal('sagemaker'))
 
-        nPolicy = iam_.Policy(self,
-                              "notebookAccessPolicy",
-                              policy_name="notebookAccessPolicy",
-                              statements=[
-                                  iam_.PolicyStatement(
-                                      actions=['s3:*', 'sagemaker:*'],
-                                      resources=[
-                                          '*',
-                                      ]),
-                              ]).attach_to_role(nRole)
+        nPolicy = iam.Policy(self,
+                             "notebookAccessPolicy",
+                             policy_name="notebookAccessPolicy",
+                             statements=[
+                                 iam.PolicyStatement(
+                                     actions=['s3:*', 'sagemaker:*'],
+                                     resources=[
+                                         '*',
+                                     ]),
+                             ]).attach_to_role(nRole)
 
         # Create notebook instances cluster
         nid = 'CDK-Notebook-Instance-ML-1'
