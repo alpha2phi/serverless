@@ -1,4 +1,5 @@
-from aws_cdk import (aws_iam as iam, core)
+from aws_cdk import (aws_iam as iam, core, aws_ec2 as ec2, aws_s3 as s3,
+                     aws_sagemaker as sm)
 
 
 class SagemakerStack(core.Stack):
@@ -11,7 +12,7 @@ class SagemakerStack(core.Stack):
             self,
             "VPC",
             max_azs=2,
-            cidr="10.10.0.0/16",
+            cidr="10.20.0.0/16",
             subnet_configuration=[
                 ec2.SubnetConfiguration(subnet_type=ec2.SubnetType.PUBLIC,
                                         name="Public",
