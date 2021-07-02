@@ -2,9 +2,10 @@
 
 from aws_cdk import core
 
-from sagemaker.sagemaker_stack import SagemakerStack
+from sagemaker.serverless_stack import ServerlessStack
 
 app = core.App()
-SagemakerStack(app, "sagemaker", env={'region': 'ap-southeast-1'})
+
+ServerlessStack(app, "serverless", env={'region': 'ap-southeast-1'})
 
 app.synth()
