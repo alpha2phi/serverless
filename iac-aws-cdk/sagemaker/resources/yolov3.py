@@ -1,8 +1,6 @@
 import os
-import io
 import boto3
 import json
-import csv
 
 # grab environment variables
 ENDPOINT_NAME = os.environ['ENDPOINT_NAME']
@@ -17,12 +15,10 @@ def lambda_handler(event, context):
     print(payload)
 
     response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
-                                       ContentType='text/csv',
+                                       ContentType='image/jpeg',
+                                       Accept='image/jpeg',
                                        Body=payload)
     print(response)
     result = json.loads(response['Body'].read().decode())
     print(result)
-    pred = int(result['predictions'][0]['score'])
-    predicted_label = 'M' if pred == 1 else 'B'
-
-    return predicted_label
+    return result
