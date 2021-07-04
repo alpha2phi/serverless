@@ -2,7 +2,7 @@ from aws_cdk import (core, aws_apigateway as apigateway, aws_s3 as s3,
                      aws_lambda as lambda_, aws_iam as iam)
 
 
-class YoloV3Service(core.Construct):
+class YOLOv3Service(core.Construct):
     def __init__(self, scope: core.Construct, id: str):
         super().__init__(scope, id)
 
@@ -17,13 +17,16 @@ class YoloV3Service(core.Construct):
             iam.ManagedPolicy.from_aws_managed_policy_name(
                 "service-role/AWSLambdaVPCAccessExecutionRole"))
         role.add_managed_policy(
-            iam.ManagedPolicy.from_aws_managed_policy_name(
-                "service-role/AmazonSageMakerFullAccess"))
+            iam.ManagedPolicy.from_managed_policy_arn(
+                self,
+                "SageMakerRole",
+                managed_policy_arn=
+                "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"))
 
-        bucket = s3.Bucket(self, "YoloV3Store")
+        bucket = s3.Bucket(self, "YOLOv3Store")
 
         handler = lambda_.Function(self,
-                                   "YoloV3Handler",
+                                   "YOLOv3Handler",
                                    runtime=lambda_.Runtime.PYTHON_3_8,
                                    code=lambda_.Code.from_asset("resources"),
                                    handler="yolov3.lambda_handler",
@@ -33,8 +36,8 @@ class YoloV3Service(core.Construct):
 
         api = apigateway.RestApi(self,
                                  "yolov3-api",
-                                 rest_api_name="YoloV3 Service",
-                                 description="YOLOV3 Services")
+                                 rest_api_name="YOLOv3 Service",
+                                 description="YOLOv3 Services")
 
         post_api = apigateway.LambdaIntegration(
             handler,
