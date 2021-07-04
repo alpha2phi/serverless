@@ -1,6 +1,6 @@
 from aws_cdk import (aws_iam as iam, core)
 
-from . import widget_service
+from .constructs import widget_service
 
 
 class WidgetServiceStack(core.Stack):
