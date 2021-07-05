@@ -8,15 +8,15 @@ from aws_cdk import (core, aws_apigateway as apigateway, aws_s3 as s3,
 
 class YOLOv3Service(core.Construct):
 
-    ENDPOINT_NAME = "yolov_v32021"
+    ENDPOINT_NAME = "yolo-v32021"
 
     def __init__(self, scope: core.Construct, id: str):
         super().__init__(scope, id)
 
         role = iam.Role(
             self,
-            "YOLOv3 Role",
-            assumed_by=iam.ServicePrincipal("sagemaker.amazonaws.com"))
+            "YOLOv3Role",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"))
         role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name(
                 "service-role/AWSLambdaBasicExecutionRole"))
@@ -24,11 +24,8 @@ class YOLOv3Service(core.Construct):
             iam.ManagedPolicy.from_aws_managed_policy_name(
                 "service-role/AWSLambdaVPCAccessExecutionRole"))
         role.add_managed_policy(
-            iam.ManagedPolicy.from_managed_policy_arn(
-                self,
-                "SageMakerRole",
-                managed_policy_arn=
-                "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"))
+            iam.ManagedPolicy.from_aws_managed_policy_name(
+                "AmazonSageMakerFullAccess"))
 
         bucket = s3.Bucket(self, "YOLOv3Store")
 
@@ -37,6 +34,8 @@ class YOLOv3Service(core.Construct):
                                    runtime=lambda_.Runtime.PYTHON_3_8,
                                    code=lambda_.Code.from_asset("resources"),
                                    handler="yolov3.lambda_handler",
+                                   role=role,
+                                   timeout=core.Duration.seconds(60),
                                    environment=dict(
                                        BUCKET=bucket.bucket_name,
                                        ENDPOINT_NAME=self.ENDPOINT_NAME))
