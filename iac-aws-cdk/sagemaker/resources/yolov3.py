@@ -1,18 +1,18 @@
 import os
 import boto3
 import json
+import base64
 
-# grab environment variables
 ENDPOINT_NAME = os.environ['ENDPOINT_NAME']
 runtime = boto3.client('runtime.sagemaker')
 
 
 def lambda_handler(event, context):
-    print("Received event: " + json.dumps(event, indent=2))
-
-    data = json.loads(json.dumps(event))
+    data = json.loads(event['body'])
     payload = data['data']
     print(payload)
+    print(f"End point={ENDPOINT_NAME}")
+    payload = base64.b64decode(payload)
 
     response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
                                        ContentType='image/jpeg',
@@ -21,4 +21,11 @@ def lambda_handler(event, context):
     print(response)
     result = json.loads(response['Body'].read().decode())
     print(result)
-    return result
+    body = json.dumps({"result": json.dumps(result)})
+
+    return {
+        "statusCode": 200,
+        "headers": {},
+        "body": body,
+        "isBase64Encoded": False
+    }

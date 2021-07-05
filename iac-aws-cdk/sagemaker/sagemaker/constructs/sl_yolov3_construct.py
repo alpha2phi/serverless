@@ -1,8 +1,15 @@
 from aws_cdk import (core, aws_apigateway as apigateway, aws_s3 as s3,
                      aws_lambda as lambda_, aws_iam as iam)
 
+# https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/README.html
+# https://docs.aws.amazon.com/cdk/latest/guide/serverless_example.html
+# https://debugthis.dev/cdk/2020-30-06-aws-cdk-code-pipeline/
+
 
 class YOLOv3Service(core.Construct):
+
+    ENDPOINT_NAME = "yolov_v32021"
+
     def __init__(self, scope: core.Construct, id: str):
         super().__init__(scope, id)
 
@@ -30,17 +37,15 @@ class YOLOv3Service(core.Construct):
                                    runtime=lambda_.Runtime.PYTHON_3_8,
                                    code=lambda_.Code.from_asset("resources"),
                                    handler="yolov3.lambda_handler",
-                                   environment=dict(BUCKET=bucket.bucket_name))
+                                   environment=dict(
+                                       BUCKET=bucket.bucket_name,
+                                       ENDPOINT_NAME=self.ENDPOINT_NAME))
 
         bucket.grant_read_write(handler)
-
-        api = apigateway.RestApi(self,
-                                 "yolov3-api",
-                                 rest_api_name="YOLOv3 Service",
-                                 description="YOLOv3 Services")
-
-        post_api = apigateway.LambdaIntegration(
-            handler,
-            request_templates={"application/json": '{ "statusCode": "200" }'})
-
-        api.root.add_method("POST", post_api)
+        api = apigateway.LambdaRestApi(self,
+                                       "yolov3-api",
+                                       handler=handler,
+                                       proxy=False)
+        inference = api.root.add_resource("inference")
+        inference.add_method(
+            "POST", authorization_type=apigateway.AuthorizationType.NONE)
